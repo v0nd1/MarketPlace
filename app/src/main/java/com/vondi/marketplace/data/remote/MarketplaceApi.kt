@@ -1,11 +1,8 @@
 package com.vondi.marketplace.data.remote
 
-import com.vondi.marketplace.model.Product
 import com.vondi.marketplace.model.ProductResponse
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import retrofit2.http.GET
 import retrofit2.http.Query
 

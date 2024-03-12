@@ -3,15 +3,15 @@ package com.vondi.marketplace.model
 import com.google.gson.annotations.SerializedName
 
 data class Product(
-    val id: Int,
-    val title: String,
-    val description: String,
-    val price: Double,
-    val discountPercentage: Double,
-    val rating: Double,
-    val stock: Int,
-    val brand: String,
-    val category: String,
-    @SerializedName("thumbnail") val thumbnailUrl: String,
-    val images: List<String>
+    @SerializedName("id") var id : Int? = null,
+    @SerializedName("title") var title : String,
+    @SerializedName("description") var description : String,
+    @SerializedName("price") var price : Int? = null,
+    @SerializedName("discountPercentage") var discountPercentage : Double? = null,
+    @SerializedName("rating") var rating : Double? = null,
+    @SerializedName("stock") var stock : Int? = null,
+    @SerializedName("brand") var brand : String? = null,
+    @SerializedName("category") var category : String? = null,
+    @SerializedName("thumbnail") var thumbnail : String? = null,
+    @SerializedName("images") var images : ArrayList<String> = arrayListOf()
 )

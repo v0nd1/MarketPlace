@@ -1,35 +1,57 @@
 package com.vondi.marketplace.model
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vondi.marketplace.data.remote.MarketplaceApi
 import com.vondi.marketplace.data.repository.ProductRepository
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+enum class STATE {
+    LOADING,
+    SUCCESS,
+    FAILED
+}
 
 class ProductViewModel : ViewModel() {
     private val repository = ProductRepository()
-    val productsLiveData = MutableLiveData<List<Product>>()
+    var productsResponse: List<Product> by mutableStateOf(listOf())
+    private var skip:Int by mutableIntStateOf(0)
+    private var errorMessage: String by mutableStateOf("")
 
-    private var currentPage = 0
-    private val pageSize = 20
+    var state by mutableStateOf(STATE.LOADING)
 
-    fun fetchProducts() {
+    fun getProducts() {
         viewModelScope.launch {
+            state = STATE.LOADING
             try {
-                val response = repository.fetchProducts(currentPage, pageSize)
-                val products = response.products
-                productsLiveData.value = products
+                val response = repository.fetchProducts(skip = skip, limit = 20)
+                productsResponse = response.products
+                skip = productsResponse.size
+                state = STATE.SUCCESS
             } catch (e: Exception) {
-                println("ERROR: ${e.message}")
+                errorMessage = e.message.toString()
+                state = STATE.FAILED
             }
         }
     }
 
     fun loadMoreProducts() {
-        currentPage += 20
-        fetchProducts()
+        viewModelScope.launch {
+            state = STATE.LOADING
+            delay(500)
+            try{
+                val response = repository.fetchProducts(skip = skip, limit = 20)
+                productsResponse = productsResponse.plus(response.products)
+                skip = productsResponse.size
+                state = STATE.SUCCESS
+            }catch (e: Exception){
+                errorMessage = e.message.toString()
+                state = STATE.FAILED
+            }
+        }
     }
 }
