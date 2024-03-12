@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -18,14 +19,21 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -44,11 +52,12 @@ import com.vondi.marketplace.presentation.components.LoadingState
 import com.vondi.marketplace.presentation.components.ThemeButton
 import com.vondi.marketplace.ui.theme.Gray
 import com.vondi.marketplace.ui.theme.Gray2
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedProductsScreen(viewModel: ProductViewModel){
-
     // Проверка на последний итем в LazyColumn
     val scrollState = rememberLazyGridState()
     val isEnd by remember{
@@ -97,7 +106,7 @@ private fun ProductCard(
             .clip(RoundedCornerShape(10))
             .background(Gray)
             .border(0.2.dp, Gray2)
-            .clickable { println(product.id) }
+            .clickable { }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -167,6 +176,41 @@ private fun LoadingProducts(){
                 .alpha(0.7f)
         ) {
             CircularProgressIndicator(modifier = Modifier.padding(50.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(){
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+            },
+            sheetState = sheetState,
+            sheetMaxWidth = 600.dp
+        ) {
+            Box(
+                modifier = Modifier.height(600.dp),
+                contentAlignment = Alignment.Center
+            ){
+                Button(onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showBottomSheet = false
+                        }
+                    }
+                }) {
+                    Text("Hide bottom sheet")
+                }
+            }
+
+
         }
     }
 }

@@ -24,20 +24,6 @@ class ProductViewModel : ViewModel() {
 
     var state by mutableStateOf(STATE.LOADING)
 
-    fun getProducts() {
-        viewModelScope.launch {
-            state = STATE.LOADING
-            try {
-                val response = repository.fetchProducts(skip = skip, limit = 20)
-                productsResponse = response.products
-                state = STATE.SUCCESS
-            } catch (e: Exception) {
-                errorMessage = e.message.toString()
-                state = STATE.FAILED
-            }
-        }
-    }
-
     fun loadMoreProducts() {
         viewModelScope.launch {
             state = STATE.LOADING
