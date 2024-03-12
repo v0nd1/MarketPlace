@@ -30,7 +30,6 @@ class ProductViewModel : ViewModel() {
             try {
                 val response = repository.fetchProducts(skip = skip, limit = 20)
                 productsResponse = response.products
-                skip = productsResponse.size
                 state = STATE.SUCCESS
             } catch (e: Exception) {
                 errorMessage = e.message.toString()
@@ -46,7 +45,7 @@ class ProductViewModel : ViewModel() {
             try{
                 val response = repository.fetchProducts(skip = skip, limit = 20)
                 productsResponse = productsResponse.plus(response.products)
-                skip = productsResponse.size
+                skip += 20
                 state = STATE.SUCCESS
             }catch (e: Exception){
                 errorMessage = e.message.toString()

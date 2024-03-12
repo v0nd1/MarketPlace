@@ -2,6 +2,7 @@ package com.vondi.marketplace.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
@@ -47,26 +49,6 @@ import com.vondi.marketplace.ui.theme.Gray2
 @Composable
 fun FeedProductsScreen(viewModel: ProductViewModel){
 
-    // Если не подгружены продукты, то подгружаем
-    if (viewModel.productsResponse.isEmpty())
-        viewModel.getProducts()
-
-    // Загрузка продуктов
-    if(viewModel.state == STATE.LOADING){
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Card(
-                modifier = Modifier
-                    .alpha(0.7f)
-            ) {
-                CircularProgressIndicator(modifier = Modifier.padding(50.dp))
-            }
-        }
-    }
-
     // Проверка на последний итем в LazyColumn
     val scrollState = rememberLazyGridState()
     val isEnd by remember{
@@ -81,19 +63,27 @@ fun FeedProductsScreen(viewModel: ProductViewModel){
         viewModel.loadMoreProducts()
     } )
 
-    // Сам LazyColumn с продуктамм
-    LazyVerticalGrid(
-        state = scrollState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-        columns = GridCells.Fixed(2),
-        content = {
-            itemsIndexed(viewModel.productsResponse) {_, product ->
-                ProductCard(product)
+    Box(modifier = Modifier.fillMaxSize()){
+        // Сам LazyColumn с продуктами
+        LazyVerticalGrid(
+            state = scrollState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 5.dp),
+            columns = GridCells.Fixed(2),
+            content = {
+                itemsIndexed(viewModel.productsResponse) {_, product ->
+                    ProductCard(product)
+                }
             }
+        )
+
+        // Загрузка продуктов
+        if(viewModel.state == STATE.LOADING){
+            LoadingProducts()
         }
-    )
+    }
+
 }
 
 
@@ -107,6 +97,7 @@ private fun ProductCard(
             .clip(RoundedCornerShape(10))
             .background(Gray)
             .border(0.2.dp, Gray2)
+            .clickable { println(product.id) }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -143,13 +134,17 @@ private fun ProductCard(
                     text = product.title,
                     fontSize = 20.sp,
                     color = Color.Black,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = product.description,
                     lineHeight = 15.sp,
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = Color.Gray,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 ThemeButton(title = "Add to Cart", onClick = {})
@@ -159,7 +154,21 @@ private fun ProductCard(
         }
 
     }
+}
 
+@Composable
+private fun LoadingProducts(){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
+        Card(
+            modifier = Modifier
+                .alpha(0.7f)
+        ) {
+            CircularProgressIndicator(modifier = Modifier.padding(50.dp))
+        }
+    }
 }
 
 

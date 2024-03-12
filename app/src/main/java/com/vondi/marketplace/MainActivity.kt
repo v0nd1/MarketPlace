@@ -9,7 +9,7 @@ import com.vondi.marketplace.presentation.FeedProductsScreen
 import com.vondi.marketplace.ui.theme.MarketPlaceTheme
 
 class MainActivity : ComponentActivity() {
-    lateinit var productViewModel: ProductViewModel
+    private lateinit var productViewModel: ProductViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initViewModel()
