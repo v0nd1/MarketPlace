@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -73,89 +74,82 @@ fun FeedProductsScreen(viewModel: ProductViewModel){
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet { /* Drawer content */ }
+            ModalDrawerSheet { 
+
+            }
         },
     ) {
         Scaffold(
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    text = { Text("Show drawer") },
-                    icon = { Icon(Icons.Filled.Add, contentDescription = "") },
-                    onClick = {
-                        scope.launch {
-                            drawerState.apply {
-                                if (isClosed) open() else close()
-                            }
-                        }
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "Marketplace",
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    },
+                    navigationIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clickable {
+                                    scope.launch {
+                                        drawerState.apply {
+                                            if (isClosed) open() else close()
+                                        }
+                                    }
+                                }
+                                .padding(start = 10.dp)
+                        )
                     }
                 )
             }
-        ) { contentPadding ->
-            Box(modifier = Modifier.padding(contentPadding))
-        }
-    }
-
-
-    // Проверка на последний итем в LazyColumn
-    val scrollState = rememberLazyGridState()
-    val isEnd by remember{
-        derivedStateOf {
-            scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ==
-                    scrollState.layoutInfo.totalItemsCount - 1
-        }
-    }
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(text = "Marketplace")
-                },
-                navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                        }
-                    )
-                }
-            )
-        }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ){
-            // Сам LazyColumn с продуктами
-            LazyVerticalGrid(
-                state = scrollState,
+        ) { 
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 10.dp, vertical = 5.dp),
-                columns = GridCells.Fixed(2),
-                content = {
-                    itemsIndexed(viewModel.productsResponse) {_, product ->
-                        ProductCard(product)
+                    .padding(it)
+            ){
+                
+                // Проверка на последний итем в LazyColumn
+                val scrollState = rememberLazyGridState()
+                val isEnd by remember{
+                    derivedStateOf {
+                        scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ==
+                                scrollState.layoutInfo.totalItemsCount - 1
                     }
                 }
-            )
+                // Сам LazyColumn с продуктами
+                LazyVerticalGrid(
+                    state = scrollState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    columns = GridCells.Fixed(2),
+                    content = {
+                        itemsIndexed(viewModel.productsResponse) {_, product ->
+                            ProductCard(product)
+                        }
+                    }
+                )
 
-            // Загрузка продуктов
-            if(viewModel.state == STATE.LOADING){
-                LoadingProducts()
+                // Загрузка продуктов
+                if(viewModel.state == STATE.LOADING){
+                    LoadingProducts()
+                }
+
+                // В случае если последний итем LazyColumn то подгружаем еще 20
+                LaunchedEffect(key1 = isEnd, block = {
+                    viewModel.loadMoreProducts()
+                } )
             }
-
-            // В случае если последний итем LazyColumn то подгружаем еще 20
-            LaunchedEffect(key1 = isEnd, block = {
-                viewModel.loadMoreProducts()
-            } )
         }
-
     }
 
 
-
-
+    
+    
 
 }
 
