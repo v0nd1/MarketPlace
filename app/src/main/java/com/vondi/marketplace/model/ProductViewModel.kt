@@ -19,21 +19,36 @@ enum class STATE {
 class ProductViewModel : ViewModel() {
     private val repository = ProductRepository()
     var productsResponse: List<Product> by mutableStateOf(listOf())
+    var category: String by mutableStateOf("electronics")
     private var skip:Int by mutableIntStateOf(0)
     private var errorMessage: String by mutableStateOf("")
-
     var state by mutableStateOf(STATE.LOADING)
 
+
+    fun chooseCategory(newCategory: String) {
+        category = newCategory
+        skip = 0
+        loadProducts()
+    }
+
     fun loadMoreProducts() {
+        skip += 20
+        loadProducts()
+    }
+
+    private fun loadProducts() {
         viewModelScope.launch {
             state = STATE.LOADING
-            delay(500)
-            try{
-                val response = repository.fetchProducts(skip = skip, limit = 20)
-                productsResponse = productsResponse.plus(response.products)
-                skip += 20
+            delay(500) // Имитируем задержку
+            try {
+                val response = repository.fetchProducts(skip, 20, category)
+                productsResponse = if (skip == 0) {
+                    response.products
+                } else {
+                    productsResponse.plus(response.products)
+                }
                 state = STATE.SUCCESS
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 errorMessage = e.message.toString()
                 state = STATE.FAILED
             }

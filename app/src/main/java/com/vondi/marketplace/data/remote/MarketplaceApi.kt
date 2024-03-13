@@ -10,8 +10,9 @@ interface MarketplaceApi {
     @GET("products")
     suspend fun getProducts(
         @Query("skip") skip: Int,
-        @Query("limit") limit: Int
-    ): ProductResponse
+        @Query("limit") limit: Int,
+        @Query("category") category: String
+     ): ProductResponse
 
     companion object {
         fun create(): MarketplaceApi {
